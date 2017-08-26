@@ -6,16 +6,6 @@ function ajax(url,fuSucss,fnFailer){
 	}else{
 		xhr = new ActiveXObject("Microsoft.XMLHTTP");
 	}
-	// console.log(url);json.json?page=1---json1.json
-	//
-	/*  if(url.indexOf("?")>-1){
-		var fileName = url.substring(0,url.indexOf("."));
-		var num      = url.substring(url.indexOf("=")+1);
-		var houzhui  = url.substring(url.indexOf("."),url.indexOf("?"));
-		url = fileName+num+houzhui;
-		// console.log(url);
-	}  */
-	
 	//2.连接服务器
 	//open(方法，文件名，异步传输)；
 	xhr.open("get",url,true);
@@ -35,6 +25,3 @@ function ajax(url,fuSucss,fnFailer){
 		}
 	}
 }
-/* ajax("ajax.txt",function(str){
-	alert(str);
-});	 */
