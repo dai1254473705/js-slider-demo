@@ -1,0 +1,259 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title></title>
+<style>
+	body,div,span,a,img,li,ul{margin:0;padding:0;}
+	#container{
+		width:520px;
+		height:280px;
+		margin:0 auto;
+		position:relative;
+		overflow:hidden;
+	}
+	ul{
+		list-style:none;
+		position:absolute;
+		float:left;
+	}
+	li{
+		float:left;
+	}
+	#leftBtn{
+		position:absolute;
+		z-index:2;
+		width:48px;
+		height:60px;
+		left:-48px;
+		top:110px;
+		background:url(img/btn.png) no-repeat left center;
+	}#rightBtn{
+		position:absolute;
+		z-index:2;
+		width:48px;
+		height:60px;
+		right:-48px;
+		top:110px;
+		background:url(img/btn.png) no-repeat right center;
+	}
+	img{
+		width:520px;
+		height:280px;
+		display:block;
+	}
+	#nav{
+		width:70px;
+		height:18px;
+		background:url(img/nav.png) no-repeat;
+		position:absolute;
+		left:225px;
+		bottom:10px;
+		z-index:2;
+	}
+	#nav span{
+		display:block;
+		width:9px;
+		height:9px;
+		background:#B2B2B2;
+		border-radius:50%;
+		float:left;
+		margin:5px 2px 0 3px;
+		cursor:pointer;
+	}
+	#nav .on{
+		background:#FF4400;
+		
+	}
+	#btn{
+		width:520px;
+		height:60px;
+		position:absolute;
+		top:-60px;
+	}
+	#btn a{
+		display:block;
+		width:50px;
+		height:50px;
+		border:1px solid #eee;
+		text-align:center;
+		line-height:50px;
+		background:#BCDCF6;
+		opacity:0.3;
+		border-radius:50%;
+		float:left;
+		cursor:pointer;
+		margin-left:60px;
+	}
+	#btn a:hover{
+		opacity:1;
+	}
+</style>
+<script src ="startMove.js"></script>
+<script src ="ajax.js"></script>
+<script>
+window.onload=function(){
+
+	//获取元素
+	var leftBtn = document.getElementById("leftBtn");
+	var btn = document.getElementById("btn");
+	var rightBtn = document.getElementById("rightBtn");
+	var container = document.getElementById("container");
+	var spanList = document.getElementsByTagName("span");
+	var oul = document.getElementsByTagName("ul")[0];
+	// console.log(leftBtn);
+	//ajax导入
+	ajax("lb.json",function(str){
+		var obj = eval("("+str+")");
+		// console.log(obj.length);
+		//默认图片
+		for(var j=0;j<obj[0].f001.length;j++){//创建json中第一个对象的数组中的图片数量相等的li和IMG
+			// console.log(obj[0].f001.length);
+			// console.log(obj.btn.child[count].length);
+			//创建li
+			var lis  = document.createElement("li");
+			var imgs = document.createElement("img");
+			imgs.src = obj[0].f001[j];
+			oul.appendChild(lis);
+			lis.appendChild(imgs);
+			// console.log(obj.f001[j]);
+			// console.log(lis);
+		}
+		
+		//点击事件循环赋值 换一批图片
+		for(var k=0;k<btn.children.length;k++){
+			btn.children[k].index = k;
+			btn.children[k].onclick = function(){
+				if(oul){//清除上次创建的li
+					oul.innerHTML= "";
+				}
+				// console.log("sdfsadfsafsad");
+				for(var j=0;j<obj[this.index].f001.length;j++){//this.index为下标，需要加1
+				//创建li
+					var lis  = document.createElement("li");
+					var imgs = document.createElement("img");
+					imgs.src = obj[this.index].f001[j];
+					oul.appendChild(lis);
+					lis.appendChild(imgs);
+					 console.log(lis);
+				}
+				//将创建的li和IMG的第一个在点击时复制
+				var firstChild = oul.children[0].cloneNode(true);
+				oul.appendChild(firstChild);
+				oul.style.width = oul.children.length * 520+"px";
+			
+			} 
+		}
+		//鼠标事件
+		container.onmouseover = function(){
+			move(leftBtn,{"opacity":100,"left":0},"",10);
+			move(rightBtn,{"opacity":100,"right":0},"",10);
+			move(btn,{"top":0},"",10);
+		}
+		container.onmouseout = function(){
+			move(leftBtn,{"opacity":0,"left":-48},"",10);
+			move(rightBtn,{"opacity":0,"right":-48},"",10);
+			move(btn,{"top":-60},"",10);
+		}
+		//克隆第一个图片
+		var firstChild = oul.children[0].cloneNode(true);
+		oul.appendChild(firstChild);
+		oul.style.width = oul.children.length * 520+"px"; 
+		 console.log(oul.children);
+		//点击右btn
+		var currIndex = 0;
+		rightBtn.onclick = function(){
+			currIndex++;
+			//如果到达边界，currindex= 0;
+			if(currIndex==oul.children.length){
+				console.log(oul.children.length);
+				currIndex=1;
+				oul.style.left = "0";
+			}
+			move(oul,{"left":currIndex*-520},"",30,10);
+			//调用清除函数,清除spanlist
+			setNavClass(currIndex >4? 0:currIndex);
+			// console.log(currIndex > 4?0:currIndex);
+			autoPlay();
+		}
+		//点击lbtn
+		leftBtn.onclick = function(){
+			currIndex--;
+			//如果到达边界，currindex= 0;
+			if(currIndex == -1){
+				currIndex=oul.children.length-2;
+				oul.style.left = (oul.children.length-1)*(-520)+"px";
+			}
+			//调用清除函数
+			setNavClass(currIndex);
+			move(oul,{"left":currIndex*-520},"",30,10);
+			autoPlay();
+		}
+		//函数清除
+		function setNavClass(index){
+			for(var i=0;i<spanList.length;i++){
+				spanList[i].className = "";
+			}
+			spanList[index].className = "on";
+		}
+		//鼠标控制左右切换
+		document.onkeydown = function(evt){
+			evt = evt || window.event;
+			// console.log(evt.keyCode);
+			if(evt.keyCode ==38 || evt.keyCode ==39){
+				rightBtn.onclick();
+			}
+			if(evt.keyCode ==37 || evt.keyCode ==40){
+				leftBtn.onclick();
+			}
+		}
+		//自动播放
+		var timer;
+		function autoPlay (){
+			clearInterval(timer);
+			timer = setInterval(function(){
+				rightBtn.onclick();
+			},3000);
+		}
+		autoPlay();
+		//点的点击事件
+		for(var i=0;i<spanList.length;i++){
+			spanList[i].index = i;
+			spanList[i].onclick = function(){
+				setNavClass(this.index);
+				currIndex = this.index;
+				move(oul,{"left":this.index*-520});
+				autoPlay();
+			}
+		}
+	})
+}
+</script>
+</head>
+<body>
+	<div id="container">
+		<a href="#" id = "leftBtn"></a>
+		<a href="#" id = "rightBtn"></a>
+		<ul>
+			<!--<li><img src="img/b1.jpg"/></li>
+			<li><img src="img/b2.jpg"/></li>
+			<li><img src="img/b3.jpg"/></li>
+			<li><img src="img/b4.jpg"/></li>
+			<li><img src="img/b5.jpg"/></li>-->
+		</ul>
+		<div id ="nav">
+			<span class="on"></span>
+			<span></span>
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+		<div id="btn">
+			<a >风景</a>	
+			<a >美女</a>	
+			<a >宠物</a>	
+			<a >影视</a>	
+		</div>
+	</div>
+</body>
+</html>
